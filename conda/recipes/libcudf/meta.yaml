@@ -13,7 +13,7 @@ source:
 
 build:
   number: {{ GIT_DESCRIBE_NUMBER }}
-  string: cuda{{ cuda_version }}_{{ GIT_DESCRIBE_HASH }}_{{ GIT_DESCRIBE_NUMBER }}
+  string: cuda{{ cuda_version }}_l4t_{{ GIT_DESCRIBE_HASH }}_{{ GIT_DESCRIBE_NUMBER }}
   script_env:
     - CC
     - CXX
@@ -36,14 +36,12 @@ requirements:
     - cmake >=3.20.1
   host:
     - librmm {{ minor_version }}.*
-    - cudatoolkit {{ cuda_version }}.*
-    - arrow-cpp 4.0.1 *cuda
-    - arrow-cpp-proc * cuda
+    - arrow-cpp 4.0.1 *cuda_l4t
+    - arrow-cpp-proc * cuda_l4t
     - dlpack>=0.5,<0.6.0a0
   run:
-    - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}
-    - arrow-cpp * *cuda
-    - arrow-cpp-proc * cuda
+    - arrow-cpp * *cuda_l4t
+    - arrow-cpp-proc * cuda_l4t
     - {{ pin_compatible('dlpack', max_pin='x.x') }}
 
 test:
