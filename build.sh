@@ -150,6 +150,8 @@ if buildAll || hasArg libcudf; then
 
     # Overriding the ALL for CUDA architectures and only building for Jetson
     CUDF_CMAKE_CUDA_ARCHITECTURES="-DCMAKE_CUDA_ARCHITECTURES=72;87"
+    # NVTX doesn't exist for Jetson, disable it by default
+    BUILD_NVTX="OFF"
 
     cmake -S $REPODIR/cpp -B ${LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
