@@ -17,11 +17,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 from numba import cuda
-try:
-    from nvtx import annotate
-except ImportError:
-    print("NVTX is not available on this system")
-
+from nvtx import annotate
 from pandas._config import get_option
 from pandas.io.formats import console
 from pandas.io.formats.printing import pprint_thing
@@ -76,7 +72,7 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
 
     _PROTECTED_KEYS = frozenset(("_data", "_index"))
 
-    #@annotate("DATAFRAME_INIT", color="blue", domain="cudf_python")
+    @annotate("DATAFRAME_INIT", color="blue", domain="cudf_python")
     def __init__(self, data=None, index=None, columns=None, dtype=None):
         """
         A GPU Dataframe object.
@@ -638,7 +634,7 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
             # Set a new attribute that is not already a column.
             super().__setattr__(key, col)
 
-    #@annotate("DATAFRAME_GETITEM", color="blue", domain="cudf_python")
+    @annotate("DATAFRAME_GETITEM", color="blue", domain="cudf_python")
     def __getitem__(self, arg):
         """
         If *arg* is a ``str`` or ``int`` type, return the column Series.
@@ -702,7 +698,7 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
                 f"__getitem__ on type {type(arg)} is not supported"
             )
 
-    #@annotate("DATAFRAME_SETITEM", color="blue", domain="cudf_python")
+    @annotate("DATAFRAME_SETITEM", color="blue", domain="cudf_python")
     def __setitem__(self, arg, value):
         """Add/set column by *arg or DataFrame*
         """
@@ -2402,7 +2398,7 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
             yield (k, self[k])
 
     @property  # type: ignore
-    #@annotate("DATAFRAME_LOC", color="blue", domain="cudf_python")
+    @annotate("DATAFRAME_LOC", color="blue", domain="cudf_python")
     def loc(self):
         """
         Selecting rows and columns by label or boolean mask.
@@ -2573,14 +2569,14 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
         return self.loc
 
     @property  # type: ignore
-    #@annotate("DATAFRAME_COLUMNS_GETTER", color="yellow", domain="cudf_python")
+    @annotate("DATAFRAME_COLUMNS_GETTER", color="yellow", domain="cudf_python")
     def columns(self):
         """Returns a tuple of columns
         """
         return self._data.to_pandas_index()
 
     @columns.setter  # type: ignore
-    #@annotate("DATAFRAME_COLUMNS_SETTER", color="yellow", domain="cudf_python")
+    @annotate("DATAFRAME_COLUMNS_SETTER", color="yellow", domain="cudf_python")
     def columns(self, columns):
         if isinstance(columns, cudf.BaseIndex):
             columns = columns.to_pandas()
@@ -3056,7 +3052,7 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
         out.columns = self.columns
         return out
 
-    #@annotate("INSERT", color="green", domain="cudf_python")
+    @annotate("INSERT", color="green", domain="cudf_python")
     def insert(self, loc, name, value):
         """ Add a column to DataFrame at the index specified by loc.
 
@@ -3713,7 +3709,7 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
 
         return outdf
 
-    #@annotate("ARGSORT", color="yellow", domain="cudf_python")
+    @annotate("ARGSORT", color="yellow", domain="cudf_python")
     def argsort(self, ascending=True, na_position="last"):
         """
         Sort by the values.
@@ -3764,7 +3760,7 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
         )
         return cudf.Series(inds_col)
 
-    #@annotate("SORT_INDEX", color="red", domain="cudf_python")
+    @annotate("SORT_INDEX", color="red", domain="cudf_python")
     def sort_index(
         self,
         axis=0,
@@ -4272,7 +4268,7 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
 
         return melt(self, **kwargs)
 
-    #@annotate("JOIN", color="blue", domain="cudf_python")
+    @annotate("JOIN", color="blue", domain="cudf_python")
     def merge(
         self,
         right,
@@ -4409,7 +4405,7 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
         )
         return gdf_result
 
-    #@annotate("JOIN", color="blue", domain="cudf_python")
+    @annotate("JOIN", color="blue", domain="cudf_python")
     def join(
         self,
         other,
@@ -4582,28 +4578,31 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
                         datetimes
         1 2018-10-08T00:00:00.000
         """
-    	if local_dict is None:
-	    local_dict = {}
+        # can't use `annotate` decorator here as we inspect the calling
+        # environment.
+        with annotate("QUERY", color="purple", domain="cudf_python"):
+            if local_dict is None:
+                local_dict = {}
 
-        if self.empty:
-	    return self.copy()
+            if self.empty:
+                return self.copy()
 
-        if not isinstance(local_dict, dict):
-	    raise TypeError(
-	        f"local_dict type: expected dict but found "
-	        f"{type(local_dict)}"
-	    )
+            if not isinstance(local_dict, dict):
+                raise TypeError(
+                    f"local_dict type: expected dict but found "
+                    f"{type(local_dict)}"
+                )
 
-        # Get calling environment
-        callframe = inspect.currentframe().f_back
-        callenv = {
-	    "locals": callframe.f_locals,
-	    "globals": callframe.f_globals,
-	    "local_dict": local_dict,
-        }
-        # Run query
-        boolmask = queryutils.query_execute(self, expr, callenv)
-        return self._apply_boolean_mask(boolmask)
+            # Get calling environment
+            callframe = inspect.currentframe().f_back
+            callenv = {
+                "locals": callframe.f_locals,
+                "globals": callframe.f_globals,
+                "local_dict": local_dict,
+            }
+            # Run query
+            boolmask = queryutils.query_execute(self, expr, callenv)
+            return self._apply_boolean_mask(boolmask)
 
     def apply(self, func, axis=1):
         """
