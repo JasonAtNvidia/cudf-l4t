@@ -4582,25 +4582,25 @@ class DataFrame(Frame, Serializable, GetAttrGetItemMixin):
                         datetimes
         1 2018-10-08T00:00:00.000
         """
-        if local_dict is None:
-            local_dict = {}
+    	if local_dict is None:
+	    local_dict = {}
 
         if self.empty:
-            return self.copy()
+	    return self.copy()
 
         if not isinstance(local_dict, dict):
-            raise TypeError(
-                f"local_dict type: expected dict but found "
-                f"{type(local_dict)}"
-                )
+	    raise TypeError(
+	        f"local_dict type: expected dict but found "
+	        f"{type(local_dict)}"
+	    )
 
         # Get calling environment
         callframe = inspect.currentframe().f_back
         callenv = {
-            "locals": callframe.f_locals,
-            "globals": callframe.f_globals,
-            "local_dict": local_dict,
-            }
+	    "locals": callframe.f_locals,
+	    "globals": callframe.f_globals,
+	    "local_dict": local_dict,
+        }
         # Run query
         boolmask = queryutils.query_execute(self, expr, callenv)
         return self._apply_boolean_mask(boolmask)
