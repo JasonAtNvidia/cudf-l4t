@@ -12,10 +12,7 @@ import cupy
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-try:
-    from nvtx import annotate
-except ImportError:
-    print("NVTX not available on this platform")
+from nvtx import annotate
 
 import cudf
 from cudf import _lib as libcudf
@@ -321,7 +318,7 @@ class Frame(libcudf.table.Table):
         return new_frame
 
     @classmethod
-    #@annotate("CONCAT", color="orange", domain="cudf_python")
+    @annotate("CONCAT", color="orange", domain="cudf_python")
     def _concat(
         cls, objs, axis=0, join="outer", ignore_index=False, sort=False
     ):
@@ -1016,7 +1013,7 @@ class Frame(libcudf.table.Table):
         """
         return cudf.core.common.pipe(self, func, *args, **kwargs)
 
-    #@annotate("SCATTER_BY_MAP", color="green", domain="cudf_python")
+    @annotate("SCATTER_BY_MAP", color="green", domain="cudf_python")
     def scatter_by_map(
         self, map_index, map_size=None, keep_index=True, **kwargs
     ):
@@ -1470,7 +1467,7 @@ class Frame(libcudf.table.Table):
         result._copy_type_metadata(self)
         return result
 
-    #@annotate("APPLY", color="purple", domain="cudf_python")
+    @annotate("APPLY", color="purple", domain="cudf_python")
     def _apply(self, func):
         """
         Apply `func` across the rows of the frame.
@@ -1806,7 +1803,7 @@ class Frame(libcudf.table.Table):
             index=self._index,
         )
 
-    #@annotate("SAMPLE", color="orange", domain="cudf_python")
+    @annotate("SAMPLE", color="orange", domain="cudf_python")
     def sample(
         self,
         n=None,
@@ -2000,7 +1997,7 @@ class Frame(libcudf.table.Table):
             return result
 
     @classmethod
-    #@annotate("FROM_ARROW", color="orange", domain="cudf_python")
+    @annotate("FROM_ARROW", color="orange", domain="cudf_python")
     def from_arrow(cls, data):
         """Convert from PyArrow Table to Frame
 
@@ -2155,7 +2152,7 @@ class Frame(libcudf.table.Table):
 
         return cls._from_table(result)
 
-    #@annotate("TO_ARROW", color="orange", domain="cudf_python")
+    @annotate("TO_ARROW", color="orange", domain="cudf_python")
     def to_arrow(self):
         """
         Convert to arrow Table
