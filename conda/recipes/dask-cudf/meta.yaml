@@ -6,7 +6,7 @@
 {% set cuda_version='.'.join(environ.get('CUDA', '10.1').split('.')[:2]) %}
 
 package:
-  name: dask-cudf
+  name: dask-cudf-l4t
   version: {{ version }}
 
 source:
@@ -25,18 +25,14 @@ build:
 requirements:
   host:
     - python
-    - cudf {{ version }}
+    - cudf-l4t {{ version }}
     - dask>=2021.6.0,<=2021.07.1
     - distributed>=2021.6.0,<=2021.07.1
   run:
     - python
-    - cudf {{ version }}
+    - cudf-l4t {{ version }}
     - dask>=2021.6.0,<=2021.07.1
     - distributed>=2021.6.0,<=2021.07.1
-  
-test:
-  requires:
-    - cudatoolkit {{ cuda_version }}.*
 
 
 about:

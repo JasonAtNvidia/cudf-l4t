@@ -5,7 +5,7 @@
 {% set cuda_version='.'.join(environ.get('CUDA', '10.1').split('.')[:2]) %}
 
 package:
-  name: libcudf
+  name: libcudf-l4t
   version: {{ version }}
 
 source:
@@ -13,7 +13,7 @@ source:
 
 build:
   number: {{ GIT_DESCRIBE_NUMBER }}
-  string: cuda{{ cuda_version }}_l4t_{{ GIT_DESCRIBE_HASH }}_{{ GIT_DESCRIBE_NUMBER }}
+  string: cuda{{ cuda_version }}_{{ GIT_DESCRIBE_HASH }}_{{ GIT_DESCRIBE_NUMBER }}
   script_env:
     - CC
     - CXX
@@ -29,13 +29,13 @@ build:
     - CMAKE_CXX_COMPILER_LAUNCHER
     - CMAKE_CUDA_COMPILER_LAUNCHER
   run_exports:
-    - {{ pin_subpackage("libcudf", max_pin="x.x") }}
+    - {{ pin_subpackage("libcudf-l4t", max_pin="x.x") }}
 
 requirements:
   build:
     - cmake >=3.20.1
   host:
-    - librmm {{ minor_version }}.*
+    - librmm-l4t {{ minor_version }}.*
     - arrow-cpp 4.0.1 *cuda_l4t
     - arrow-cpp-proc * cuda_l4t
     - dlpack>=0.5,<0.6.0a0
